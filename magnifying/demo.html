@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    *{margin: 0;padding: 0;border: 0}
+    .magnifying{
+        margin: 100px auto;
+        width: 600px;
+        overflow: hidden;
+    }
+    .magnifying .box{
+        width: 200px;
+        height: 200px;
+        border: 1px solid seagreen;
+        float: left;
+    }
+    .magnifying .box img{
+        width: 100%;
+        height: 100%;
+
+    }
+    .magnifying .masking{
+        width: 100px;
+        height: 100px;
+        position: fixed;
+        display: none;
+        background: #7e8c8d;
+        opacity: 0.5;
+    }
+    .magnifying .copyBox{
+        background: no-repeat center / 400px 400px;
+        margin-left: 100px;
+    }
+</style>
+<body>
+
+<div id="magnifying" class="magnifying">
+    <div class="box" id="box">
+        <img id="img" src="img/logo.png" alt="">
+        <div class="masking" id="masking"></div>
+    </div>
+    <div class="copyBox box" id="copyBox"></div>
+</div>
+
+<script>
+    var copyBox = document.getElementById('copyBox'),
+        box = document.getElementById('box'),
+        masking = document.getElementById('masking');
+　
+    //盒子宽高和坐标
+    var elW , elH , elX , elY ;
+
+    //放大镜宽高
+    var cElW , cElH ;
+
+    //鼠标移入的准备工作
+    box.onmouseover = function(){
+        //图片盒子四维
+        elW = box.getBoundingClientRect().width;
+        elH = box.getBoundingClientRect().height;
+        elX = box.getBoundingClientRect().left;
+        elY = box.getBoundingClientRect().top;
+
+        //显示放大镜
+        setCss(masking,{display:'block'});
+        cElW  = masking.getBoundingClientRect().width;
+        cElH  = masking.getBoundingClientRect().height;
+
+        //img标签
+        var img = box.querySelector('#img');
+        var src = img.getAttribute('src');
+
+        setCss(copyBox,{backgroundImage:'url('+src+')'});
+    };
+
+    box.onmousemove = function (event) {
+        //鼠标位置
+        var e = event||window.event;
+        var x = e.clientX-cElW/2,
+            y = e.clientY-cElH/2;
+
+        //范围
+        var maxX = elX + elW,
+            maxY = elY + elH;
+
+        if(x<=elX){
+            x = elX
+        }else if(x > maxX-cElW){
+            x = maxX-cElW
+        }
+
+        if(y<=elY){
+            y = elY
+        }else if(y>maxY-cElH){
+            y = maxY-cElH
+        }
+
+        //放大镜跟随鼠标移动同时右边背景图定位跟随移动
+        setCss(masking,{left:x+'px',top:y+'px'});
+        setCss(copyBox,{backgroundPositionX:-(x-elX)*2+'px',backgroundPositionY:-(y-elY)*2+'px'});//ps：左右两边移动数据为一正一负
+
+    };
+
+    //鼠标移出=》干掉盒子,清空背景图
+    box.onmouseout = function () {
+        setCss(masking,{display:'none'});
+        setCss(copyBox,{background:'no-repeat center / 400px 400px'});
+    };
+
+
+    function setCss(el,object) {
+        var x ;
+        for(x in object){
+            el.style[x]=object[x];
+        }
+    }
+</script>
+</body>
+</html>
